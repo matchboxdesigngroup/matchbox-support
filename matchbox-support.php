@@ -1,24 +1,67 @@
 <?php
 /**
+ * Matchbox Support plugin for WordPress
+ *
+ * @package           matchbox-support
+ * @link              https://github.com/matchboxdesigngroup/matchbox-support
+ * @author            Matchbox, Cullen Whitmore
+ * @copyright         2024 Matchbox Design Group
+ * @license           GPL v2 or later
+ * 
  * Plugin Name:       Matchbox Support
- * Plugin URI:        https://github.com/matchboxdesigngroup/matchbox-support
  * Description:       Add helpers for the Matchbox support team.
+ * Version:           1.0.0
+ * Plugin URI:        https://github.com/matchboxdesigngroup/matchbox-support
  * Author:            Matchbox Design Group, Cullen Whitmore
  * Author URI:        https://matchboxdesigngroup.com/
+ * Text Domain:       matchbox-support
  * Requires at least: 6.2
  * Requires PHP:      8.0
- * Version:           1.0.0
  * License:           General Public License v2 or later
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       matchbox-support
+ *
+ * This program is free software; you can redistribute it and/or modify it under 
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation; either version 2 of the License, or( at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
  * This file represents the entry point for the Matchbox Support plugin where it handles
  * the initial setup like defining constants. It's responsible for initiating the plugin's
  * functionality by setting up necessary hooks and loading required files.
- *
- * @package matchbox-support
- * @since 0.1.0
  */
+
+/**
+ * Initialize Plugin Update Checker for GitHub-hosted updates.
+ *
+ * This function sets up the Plugin Update Checker (PUC) to check for plugin updates from
+ * the specified GitHub repository. It is configured to look for the latest release
+ * of the plugin, allowing the plugin to automatically fetch updates when a new version
+ * is tagged in GitHub.
+ *
+ * @link https://github.com/YahnisElsts/plugin-update-checker?tab=readme-ov-file#github-integration
+ * @return void
+ * @since 0.3.0
+ */
+function matchbox_support_initialize_update_checker() {
+    // Check if the Plugin Update Checker class exists to prevent potential conflicts.
+    if ( !class_exists('YahnisElsts\PluginUpdateChecker\v5\PucFactory') ) {
+        require_once plugin_dir_path(__FILE__) . 'includes/plugin-update-checker/plugin-update-checker.php';
+    }
+
+    // Initialize the update checker for the GitHub-hosted plugin.
+    $updateChecker = YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+        'https://github.com/matchboxdesigngroup/matchbox-support',
+        __FILE__,
+        'matchbox-support'
+    );
+
+    // Configure the update checker to look for GitHub release assets.
+    $updateChecker->getVcsApi()->enableReleaseAssets();
+}
+add_action('plugins_loaded', 'matchbox_support_initialize_update_checker');
 
  // Load script with dynamic access token
 
