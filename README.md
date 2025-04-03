@@ -11,6 +11,10 @@ This WordPress plugin adds helpers for the Matchbox support team.
 The plugin adds a HelpScout Beacon for site admins to the site's front-end and admin areas.
 This allows those users to submit a support ticket from directly within their site.
 
+## Installation
+
+1. Navigate to the plugin's directory and run `composer install`
+
 ## Requirements
 
 - A pre-configured [HelpScout Beacon](https://docs.helpscout.com/article/1250-beacon-jumpstart-guide).
