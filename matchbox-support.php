@@ -38,8 +38,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Matchbox_Support\Matchbox_Support_Main;
-
 /**
  * Define constants
  */
@@ -50,33 +48,8 @@ if ( ! defined( 'MATCHBOX_SUPPORT_FILE' ) ) {
 	define( 'MATCHBOX_SUPPORT_FILE', __FILE__ );
 }
 
-/**
- * Register custom autoloader
- */
-spl_autoload_register(
-	function ( $class_name ) {
-		$prefix   = 'Matchbox_Support\\';
-		$base_dir = __DIR__ . '/includes/';
+require_once __DIR__ . '/includes/autoload.php';
 
-		if ( ! str_starts_with( $class_name, $prefix ) ) {
-			return;
-		}
+use Matchbox_Support\Matchbox_Support_Main;
 
-		$relative_class = strtolower( str_replace( array( '\\', '_' ), array( '/', '-' ), substr( $class_name, strlen( $prefix ) ) ) );
-
-		$relative_class_parts = explode( '/', $relative_class );
-		$relative_class_parts[ array_key_last( $relative_class_parts ) ] = 'class-' . end( $relative_class_parts );
-		$relative_class = implode( '/', $relative_class_parts );
-
-		$file = $base_dir . $relative_class . '.php';
-
-		if ( is_file( $file ) ) {
-			require $file;
-		}
-	}
-);
-
-require_once __DIR__ . '/vendor/autoload.php';
-
-// Instantiate the main class.
 Matchbox_Support_Main::instance();
