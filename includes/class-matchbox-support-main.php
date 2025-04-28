@@ -58,6 +58,7 @@ class Matchbox_Support_Main {
 				}
 			}
 		);
+		add_action( 'plugins_loaded', array( $this, 'matchbox_support_initialize_update_checker' ) );
 	}
 
 	/**
@@ -151,5 +152,29 @@ class Matchbox_Support_Main {
 
 		// Enqueue the CSS file.
 		wp_enqueue_style( 'matchbox-toggle-helpscout-style', plugin_dir_url( MATCHBOX_SUPPORT_FILE ) . 'assets/css/toggle-helpscout.css', array(), '1.0', 'all' );
+	}
+
+	/**
+	 * Initialize Plugin Update Checker for GitHub-hosted updates.
+	 *
+	 * This function sets up the Plugin Update Checker (PUC) to check for plugin updates from
+	 * the specified GitHub repository. It is configured to look for the latest release
+	 * of the plugin, allowing the plugin to automatically fetch updates when a new version
+	 * is tagged in GitHub.
+	 *
+	 * @link https://github.com/YahnisElsts/plugin-update-checker?tab=readme-ov-file#github-integration
+	 * @return void
+	 * @since 0.3.0
+	 */
+	public function matchbox_support_initialize_update_checker() {
+		// Initialize the update checker for the GitHub-hosted plugin.
+		$update_checker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+			'https://github.com/matchboxdesigngroup/matchbox-support',
+			__FILE__,
+			'matchbox-support'
+		);
+
+		// Configure the update checker to look for GitHub release assets.
+		$update_checker->getVcsApi()->enableReleaseAssets();
 	}
 }
