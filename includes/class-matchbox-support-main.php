@@ -59,6 +59,7 @@ class Matchbox_Support_Main {
 			}
 		);
 		add_action( 'plugins_loaded', array( $this, 'matchbox_support_initialize_update_checker' ) );
+		add_action( 'template_redirect', [ $this, 'disable_author_archive' ], 0 );
 	}
 
 	/**
@@ -176,5 +177,41 @@ class Matchbox_Support_Main {
 
 		// Configure the update checker to look for GitHub release assets.
 		$update_checker->getVcsApi()->enableReleaseAssets();
+	}
+
+	/**
+	 * Disable the author archive.
+	 *
+	 * Fire early on `template_redirect` so the normal template loader never runs.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	public function disable_author_archive() {
+		/*
+		* Filter:
+		* --------
+		* Return `false` from your (child-)theme to KEEP the author archive.
+		*
+		* add_filter( 'matchbox_disable_author_archive', '__return_false' );
+		*/
+		$disable_author = apply_filters( 'matchbox_disable_author_archive', true );
+
+		// Only 404 real author archives that we *do* want to disable.
+		if ( is_author() && $disable_author ) {
+
+			// Tell WP this is a 404 and send the proper HTTP header.
+			global $wp_query;
+			$wp_query->set_404();
+			status_header( 404 );
+			nocache_headers();
+
+			// Load the 404 template if it exists and stop execution.
+			if ( $template = get_404_template() ) {
+				include $template;
+			}
+			exit;
+		}
 	}
 }
