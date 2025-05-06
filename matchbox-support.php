@@ -51,5 +51,7 @@ if ( ! defined( 'MATCHBOX_SUPPORT_FILE' ) ) {
 require_once __DIR__ . '/includes/autoload.php';
 
 use Matchbox_Support\Matchbox_Support_Main;
+use Matchbox_Support\Matchbox_Userback;
 
 Matchbox_Support_Main::instance();
+Matchbox_Userback::instance();
