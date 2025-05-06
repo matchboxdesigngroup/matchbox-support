@@ -15,10 +15,13 @@
  * Author:            Matchbox Design Group, Cullen Whitmore
  * Author URI:        https://matchboxdesigngroup.com/
  * Text Domain:       matchbox-support
+ * Namespace:         MatchboxSupport
  * Requires at least: 6.2
  * Requires PHP:      8.0
  * License:           General Public License v2 or later
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
+ *
+ * @package MatchboxSupport
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -39,7 +42,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Define constants
+ * Define constants.
  */
 if ( ! defined( 'MATCHBOX_SUPPORT_DIR' ) ) {
 	define( 'MATCHBOX_SUPPORT_DIR', __DIR__ );
@@ -48,8 +51,8 @@ if ( ! defined( 'MATCHBOX_SUPPORT_FILE' ) ) {
 	define( 'MATCHBOX_SUPPORT_FILE', __FILE__ );
 }
 
-require_once __DIR__ . '/includes/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
-use Matchbox_Support\Matchbox_Support_Main;
+use MatchboxSupport\Plugin;
 
-Matchbox_Support_Main::instance();
+plugin::instance();
