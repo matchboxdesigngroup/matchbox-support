@@ -36,6 +36,15 @@ class Plugin {
 	private API $api;
 
 	/**
+	 * Plugin path.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @var string
+	 */
+	public $plugin_path;
+
+	/**
 	 * Retrieve the singleton instance.
 	 *
 	 * @since 1.0.0
@@ -54,6 +63,8 @@ class Plugin {
 	 * @return void
 	 */
 	private function __construct() {
+		$this->plugin_path = MATCHBOX_SUPPORT_DIR . '/';
+
 		add_action(
 			'init',
 			function () {
@@ -69,6 +80,7 @@ class Plugin {
 		);
 
 		add_action( 'plugins_loaded', [ $this, 'matchbox_support_initialize_update_checker' ] );
+		add_action( 'plugins_loaded', [ $this, 'init_helpers' ], 1 );
 		add_action( 'template_redirect', [ $this, 'disable_author_archive' ], 0 );
 
 		$this->api = new API();
@@ -225,5 +237,16 @@ class Plugin {
 
 			exit;
 		}
+	}
+
+	/**
+	 * Initializes helper functions.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public function init_helpers() {
+		require_once $this->plugin_path . 'src/functions/utils.php';
 	}
 }
