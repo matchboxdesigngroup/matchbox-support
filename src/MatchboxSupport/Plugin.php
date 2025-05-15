@@ -159,30 +159,19 @@ class Plugin {
 	 * @return void
 	 */
 	public function matchbox_support_enqueue_assets() {
-		$plugin_url  = plugin_dir_url( MATCHBOX_SUPPORT_FILE );
-		$plugin_path = plugin_dir_path( MATCHBOX_SUPPORT_FILE );
-
 		wp_enqueue_script(
 			'matchbox-toggle-helpscout',
-			$plugin_url . 'assets/js/toggle-helpscout.js',
+			plugin_dir_url( MATCHBOX_SUPPORT_FILE ) . 'assets/js/toggle-helpscout.js',
 			[ 'jquery' ],
-			filemtime( $plugin_path . 'assets/js/toggle-helpscout.js' ),
-			true
-		);
-
-		wp_enqueue_script(
-			'matchbox-core-columns-custom-class',
-			$plugin_url . 'assets/js/core-columns-custom-class.js',
-			[],
-			filemtime( $plugin_path . 'assets/js/core-columns-custom-class.js' ),
+			'1.0',
 			true
 		);
 
 		wp_enqueue_style(
 			'matchbox-toggle-helpscout-style',
-			$plugin_url . 'assets/css/toggle-helpscout.css',
+			plugin_dir_url( MATCHBOX_SUPPORT_FILE ) . 'assets/css/toggle-helpscout.css',
 			[],
-			filemtime( $plugin_path . 'assets/css/toggle-helpscout.css' )
+			'1.0'
 		);
 	}
 
