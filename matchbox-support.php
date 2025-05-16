@@ -2,7 +2,7 @@
 /**
  * Matchbox Support plugin for WordPress
  *
- * @package           matchbox-support
+ * @package           MatchboxSupport
  * @link              https://github.com/matchboxdesigngroup/matchbox-support
  * @author            Matchbox, Cullen Whitmore
  * @copyright         2024 Matchbox Design Group
@@ -21,7 +21,6 @@
  * License:           General Public License v2 or later
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package MatchboxSupport
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -54,5 +53,7 @@ if ( ! defined( 'MATCHBOX_SUPPORT_FILE' ) ) {
 require_once __DIR__ . '/vendor/autoload.php';
 
 use MatchboxSupport\Plugin;
+use MatchboxSupport\Userback;
 
-plugin::instance();
+Plugin::instance();
+Userback::instance();
