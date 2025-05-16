@@ -21,3 +21,36 @@ if ( ! function_exists( 'dd' ) ) {
 		die();
 	}
 }
+
+if ( ! function_exists( 'format_phone_for_tel_link' ) ) {
+	/**
+	 * Format a phone number for a tel link.
+	 *
+	 * Example: format_phone_for_tel_link("(555) 123-4567")
+	 * Returns: tel:+15551234567
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $phone Phone number to format.
+	 *
+	 * @return string Formatted phone number for tel link.
+	 */
+	function format_phone_for_tel_link( $phone ) {
+		// Remove all non-numeric characters.
+		$phone = preg_replace( '/[^0-9]/', '', $phone );
+
+		// Check if phone number length is valid (10 digits for US numbers).
+		if ( strlen( $phone ) === 10 ) {
+			// Format the number as (XXX) XXX-XXXX.
+			$formatted = 'tel:+1' . $phone;
+			return $formatted;
+		} elseif ( strlen( $phone ) === 11 && substr( $phone, 0, 1 ) === '1' ) {
+			// If the number is 11 digits and starts with '1', assume it's a US number with country code.
+			$formatted = 'tel:+' . $phone;
+			return $formatted;
+		} else {
+			// Return the original phone number if it doesn't match expected lengths.
+			return $phone;
+		}
+	}
+}
