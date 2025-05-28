@@ -47,8 +47,6 @@ class Userback {
 	 */
 	private function init_hooks() {
 		add_action( 'init', array( $this, 'initialize_userback' ) );
-		add_action( 'admin_init', array( $this, 'settings_init' ) );
-		add_action( 'admin_menu', array( $this, 'settings_menu' ) );
 	}
 
 	/**
@@ -67,87 +65,13 @@ class Userback {
 	}
 
 	/**
-	 * Initialize settings for Matchbox Userback.
-	 *
-	 * Registers the Userback access token setting and adds the settings section and field.
-	 */
-	public function settings_init() {
-		// Register a setting for storing the Userback access token.
-		register_setting( 'matchbox-userback', 'matchbox_access_token' );
-
-		// Add a section within the settings page to hold various fields.
-		add_settings_section(
-			'matchbox_userback_settings_section',
-			'Userback Access Token Settings',
-			array( $this, 'settings_section_cb' ),
-			'matchbox-userback'
-		);
-
-		// Add a field to the previously defined section for the Userback access token.
-		add_settings_field(
-			'matchbox_access_token',
-			'Access Token',
-			array( $this, 'access_token_field_cb' ),
-			'matchbox-userback',
-			'matchbox_userback_settings_section'
-		);
-	}
-
-
-	/**
-	 * Callback function for settings section.
-	 */
-	public function settings_section_cb() {
-		echo '<p>Enter your Userback Access Token.</p>';
-	}
-
-	/**
-	 * Callback function for the access token field.
-	 */
-	public function access_token_field_cb() {
-		$access_token = get_option( 'matchbox_access_token' );
-		echo '<input type="text" id="matchbox_access_token" name="matchbox_access_token" value="' . esc_attr( $access_token ) . '" />';
-	}
-
-	/**
-	 * Add the settings page to the Tools menu.
-	 */
-	public function settings_menu() {
-		add_management_page(
-			'Matchbox Userback Settings',
-			'Matchbox Userback',
-			'manage_options',
-			'matchbox-userback',
-			array( $this, 'options_page' )
-		);
-	}
-
-	/**
-	 * Render the settings page content for Matchbox Userback.
-	 */
-	public function options_page() {
-		?>
-		<div class="wrap">
-			<h2>Matchbox Userback Settings</h2>
-			<form action="options.php" method="post">
-				<?php
-				settings_fields( 'matchbox-userback' );
-				do_settings_sections( 'matchbox-userback' );
-				submit_button();
-				?>
-			</form>
-		</div>
-		<?php
-	}
-
-	/**
 	 * Print the Userback script in the footer.
 	 *
 	 * This function retrieves the Userback access token from the options
 	 * and embeds the Userback widget script into the footer of the page.
 	 */
 	public function print_script() {
-		$access_token = get_option( 'matchbox_access_token', 'default_token_if_not_set' );
+		$access_token = get_option( 'matchbox_userback_token', 'default_token_if_not_set' );
 		echo "<script type='text/javascript'>
 			window.Userback = window.Userback || {};
 			Userback.access_token = '{$access_token}';
