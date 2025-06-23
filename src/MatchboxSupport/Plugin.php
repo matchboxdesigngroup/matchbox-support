@@ -103,7 +103,7 @@ class Plugin {
 			'matchbox-helpscout-beacon',
 			plugin_dir_url( MATCHBOX_SUPPORT_FILE ) . 'assets/js/helpscout-beacon.js',
 			[],
-			'1.0',
+			MATCHBOX_SUPPORT_VERSION,
 			true
 		);
 
@@ -128,7 +128,7 @@ class Plugin {
 			'matchbox-helpscout-beacon',
 			plugin_dir_url( MATCHBOX_SUPPORT_FILE ) . 'assets/js/helpscout-beacon.js',
 			[],
-			'1.0',
+			MATCHBOX_SUPPORT_VERSION,
 			true
 		);
 
@@ -179,7 +179,7 @@ class Plugin {
 			'matchbox-toggle-helpscout',
 			plugin_dir_url( MATCHBOX_SUPPORT_FILE ) . 'assets/js/toggle-helpscout.js',
 			[ 'jquery' ],
-			'1.0',
+			MATCHBOX_SUPPORT_VERSION,
 			true
 		);
 
@@ -187,7 +187,7 @@ class Plugin {
 			'matchbox-toggle-helpscout-style',
 			plugin_dir_url( MATCHBOX_SUPPORT_FILE ) . 'assets/css/toggle-helpscout.css',
 			[],
-			'1.0'
+			MATCHBOX_SUPPORT_VERSION
 		);
 	}
 

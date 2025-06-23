@@ -121,9 +121,9 @@ class Userback {
 	 */
 	public function enqueue_assets() {
 		// Enqueue the JS file.
-		wp_enqueue_script( 'matchbox-toggle-userback', plugin_dir_url( MATCHBOX_SUPPORT_FILE ) . 'assets/js/toggle-userback.js', array( 'jquery' ), '1.0', true );
+		wp_enqueue_script( 'matchbox-toggle-userback', plugin_dir_url( MATCHBOX_SUPPORT_FILE ) . 'assets/js/toggle-userback.js', array( 'jquery' ), MATCHBOX_SUPPORT_VERSION, true );
 
 		// Enqueue the CSS file.
-		wp_enqueue_style( 'matchbox-toggle-userback-style', plugin_dir_url( MATCHBOX_SUPPORT_FILE ) . 'assets/css/toggle-userback.css', array(), '1.0', 'all' );
+		wp_enqueue_style( 'matchbox-toggle-userback-style', plugin_dir_url( MATCHBOX_SUPPORT_FILE ) . 'assets/css/toggle-userback.css', array(), MATCHBOX_SUPPORT_VERSION, 'all' );
 	}
 }
