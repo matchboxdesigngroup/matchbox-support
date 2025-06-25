@@ -108,7 +108,6 @@ class Userback {
 				'href' => '#',
 				'meta' =>
 					array(
-						'onclick' => 'matchboxToggleUserback(); return false;',
 						'title' => 'Show or hide the testing feedback overlay',
 					),
 				'parent' => 'top-secondary', // Moves it to the right side of the admin bar near "Howdy, admin".
