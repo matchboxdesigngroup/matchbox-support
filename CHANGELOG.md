@@ -30,3 +30,12 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Bugs
 
 [2.0.0]: https://github.com/matchboxdesigngroup/matchbox-support/releases/tag/v2.0.0
+
+## [2.0.1] - 2025-06-26
+
+### Fixed
+
+- Error when Beacon ID doesn't exist
+- Sporadic console messages when toggle buttons aren't found
+
+[2.0.1]: https://github.com/matchboxdesigngroup/matchbox-support/releases/tag/v2.0.1

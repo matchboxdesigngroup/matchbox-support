@@ -10,7 +10,7 @@
  *
  * Plugin Name:       Matchbox Support
  * Description:       Add helpers for the Matchbox support team.
- * Version:           2.0.0
+ * Version:           2.0.1
  * Plugin URI:        https://github.com/matchboxdesigngroup/matchbox-support
  * Author:            Matchbox Design Group, Cullen Whitmore
  * Author URI:        https://matchboxdesigngroup.com/
@@ -50,7 +50,7 @@ if ( ! defined( 'MATCHBOX_SUPPORT_FILE' ) ) {
 	define( 'MATCHBOX_SUPPORT_FILE', __FILE__ );
 }
 if ( ! defined( 'MATCHBOX_SUPPORT_VERSION' ) ) {
-	define( 'MATCHBOX_SUPPORT_VERSION', '2.0.0' );
+	define( 'MATCHBOX_SUPPORT_VERSION', '2.0.1' );
 }
 
 require_once __DIR__ . '/vendor/autoload.php';
