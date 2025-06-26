@@ -159,7 +159,6 @@ class Plugin {
 				'title'  => '<div class="matchbox-support-pill-toggle" id="matchbox-support-pill-toggle"><div class="toggle-icon">' . $svg_icon . '</div></div>',
 				'href'   => '#',
 				'meta'   => [
-					'onclick' => 'matchboxToggleHelpscout(); return false;',
 					'title'   => esc_attr__( 'Show or hide the Matchbox Support overlay', 'matchbox' ),
 				],
 				'parent' => 'top-secondary',

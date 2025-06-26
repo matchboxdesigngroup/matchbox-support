@@ -97,16 +97,14 @@ document.addEventListener('DOMContentLoaded', function () {
         console.warn("Pill toggle button not found.");
     }
 
-    // Set up a timer to initialize the state when the DOM is fully loaded
-    const initInterval = setInterval(function () {
+    // Observe DOM changes to detect when overlay is added dynamically
+    const observer = new MutationObserver(function (mutationsList, observer) {
         const overlay = document.getElementById('beacon-container');
         const toggleButton = document.getElementById('matchbox-support-pill-toggle');
-
         if (overlay && toggleButton) {
             initializeToggleState();
-            clearInterval(initInterval); // Clear the interval once the elements are found and initialized
-        } else {
-            console.log("Waiting for overlay and toggle button to be available...");
+            observer.disconnect();
         }
-    }, 500); // Check every 500ms
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
 });
