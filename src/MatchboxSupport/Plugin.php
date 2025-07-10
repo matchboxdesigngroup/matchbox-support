@@ -200,10 +200,10 @@ class Plugin {
 	public function matchbox_support_initialize_update_checker() {
 		$update_checker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
 			'https://github.com/matchboxdesigngroup/matchbox-support',
-			__FILE__,
+			MATCHBOX_SUPPORT_FILE,
 			'matchbox-support'
 		);
-
+		$update_checker->setBranch('main');
 		$update_checker->getVcsApi()->enableReleaseAssets();
 	}
 
