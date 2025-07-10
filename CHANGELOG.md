@@ -39,3 +39,11 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Sporadic console messages when toggle buttons aren't found
 
 [2.0.1]: https://github.com/matchboxdesigngroup/matchbox-support/releases/tag/v2.0.1
+
+## [2.0.2] - 2025-07-10
+
+### Fixed
+
+- Plugin update bug.
+
+[2.0.2]: https://github.com/matchboxdesigngroup/matchbox-support/releases/tag/v2.0.2

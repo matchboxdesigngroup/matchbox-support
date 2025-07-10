@@ -10,7 +10,7 @@
  *
  * Plugin Name:       Matchbox Support
  * Description:       Add helpers for the Matchbox support team.
- * Version:           2.0.1
+ * Version:           2.0.2
  * Plugin URI:        https://github.com/matchboxdesigngroup/matchbox-support
  * Author:            Matchbox Design Group, Cullen Whitmore
  * Author URI:        https://matchboxdesigngroup.com/
