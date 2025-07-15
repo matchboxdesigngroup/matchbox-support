@@ -203,7 +203,6 @@ class Plugin {
 			MATCHBOX_SUPPORT_FILE,
 			'matchbox-support'
 		);
-		$update_checker->setBranch('main');
 		$update_checker->getVcsApi()->enableReleaseAssets();
 	}
 
