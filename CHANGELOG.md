@@ -47,3 +47,11 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Plugin update bug.
 
 [2.0.2]: https://github.com/matchboxdesigngroup/matchbox-support/releases/tag/v2.0.2
+
+## [2.0.3] - 2025-07-16
+
+### Fixed
+
+- Update plugin from release assets only.
+
+[2.0.3]: https://github.com/matchboxdesigngroup/matchbox-support/releases/tag/v2.0.3
