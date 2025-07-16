@@ -55,3 +55,9 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Update plugin from release assets only.
 
 [2.0.3]: https://github.com/matchboxdesigngroup/matchbox-support/releases/tag/v2.0.3
+
+## [TBD] - TBD
+
+### Added
+
+- Userback toolbar toggle: Adds a button to the Full Site Editor toolbar that allows users to show or hide the Userback feedback widget while editing.
