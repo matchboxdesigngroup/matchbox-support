@@ -87,6 +87,8 @@ class Plugin {
 		add_action( 'admin_init', [ $this, 'settings_init' ] );
 		add_action( 'admin_init', [ $this, 'disable_block_recommendations' ] );
 
+		add_action( 'init', [ $this, 'register_blocks' ] );
+
 		$this->api = new API();
 		$this->api->init();
 	}
@@ -366,5 +368,31 @@ class Plugin {
 	 */
 	public function disable_block_recommendations() {
 		remove_action( 'enqueue_block_editor_assets', 'wp_enqueue_editor_block_directory_assets' );
+	}
+
+	/**
+	 * Register all blocks defined in the build/blocks directory.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	public function register_blocks() {
+		// Get all block.json files in the build/blocks directory.
+		$block_folders = glob( plugin_dir_path( dirname( __DIR__ ) ) . 'build/blocks/*', GLOB_ONLYDIR );
+
+		foreach ( $block_folders as $block_folder ) {
+			// Skip registering the userback-toggle block if the Userback token is not set.
+			if ( strpos( $block_folder, 'userback-toggle' ) !== false ) {
+				$userback_token = get_option( 'matchbox_userback_token' );
+				if ( empty( $userback_token ) ) {
+					continue;
+				}
+			}
+
+			if ( file_exists( $block_folder . '/block.json' ) ) {
+				register_block_type( $block_folder );
+			}
+		}
 	}
 }
