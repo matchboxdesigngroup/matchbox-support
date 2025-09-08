@@ -322,7 +322,12 @@ class Plugin {
 			'matchbox-support',
 			'matchbox_support_settings_section'
 		);
+
+		add_filter( 'pre_update_option_matchbox_userback_token', [ $this, 'validate_userback_token' ], 10, 2 );
+
 	}
+
+
 
 	/**
 	 * Callback for the settings section description.
@@ -383,16 +388,69 @@ class Plugin {
 
 		foreach ( $block_folders as $block_folder ) {
 			// Skip registering the userback-toggle block if the Userback token is not set.
-			if ( strpos( $block_folder, 'userback-toggle' ) !== false ) {
-				$userback_token = get_option( 'matchbox_userback_token' );
-				if ( empty( $userback_token ) ) {
-					continue;
-				}
-			}
+if ( strpos( $block_folder, 'userback-toggle' ) !== false ) {
+	$userback_token = get_option( 'matchbox_userback_token' );
+	$is_valid       = get_option( 'matchbox_userback_token_valid' );
+	if ( empty( $userback_token ) || ! $is_valid ) {
+		continue;
+	}
+}
+
 
 			if ( file_exists( $block_folder . '/block.json' ) ) {
 				register_block_type( $block_folder );
 			}
 		}
+	}
+	public function validate_userback_token( $new_value, $old_value ) {
+		if ( empty( $new_value ) ) {
+			delete_option( 'matchbox_userback_token_valid' );
+			return '';
+		}
+
+		$response = wp_remote_get(
+			'https://api.userback.io/api/v2/projects',
+			[
+				'headers' => [
+					'Authorization' => 'Bearer ' . sanitize_text_field( $new_value ),
+				],
+				'timeout' => 10,
+			]
+		);
+
+		if ( is_wp_error( $response ) ) {
+			add_settings_error(
+				'matchbox_userback_token',
+				'invalid_token',
+				'Error connecting to Userback API.',
+				'error'
+			);
+			return $old_value;
+		}
+
+		$code = wp_remote_retrieve_response_code( $response );
+		$body = wp_remote_retrieve_body( $response );
+		$json = json_decode( $body, true );
+
+		if ( $code !== 200 || ! is_array( $json ) ) {
+			add_settings_error(
+				'matchbox_userback_token',
+				'invalid_token',
+				'Invalid Userback access token. Please check and try again.',
+				'error'
+			);
+			return $old_value;
+		}
+
+		update_option( 'matchbox_userback_token_valid', true );
+
+		add_settings_error(
+			'matchbox_userback_token',
+			'valid_token',
+			'Userback token is valid.',
+			'updated'
+		);
+
+		return sanitize_text_field( $new_value );
 	}
 }
