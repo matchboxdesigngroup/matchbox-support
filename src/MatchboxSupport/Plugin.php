@@ -69,6 +69,11 @@ class Plugin {
 			'init',
 			function () {
 				if ( current_user_can( 'manage_options' ) || current_user_can( 'edit_posts' ) ) {
+					$beacon_id = get_option( 'matchbox_helpscout_beacon_id', '' );
+					$beacon_is_valid = get_option( 'matchbox_helpscout_beacon_id_valid', false );
+					if ( empty( $beacon_id ) || ! $beacon_is_valid ) {
+						return;
+					}
 					add_action( 'admin_footer', [ $this, 'add_matchbox_helpscout_beacon_to_admin_footer' ], 100 );
 					add_action( 'wp_footer', [ $this, 'add_matchbox_helpscout_beacon_to_frontend_footer' ], 100 );
 					add_action( 'admin_bar_menu', [ $this, 'matchbox_support_add_helpscout_toggle' ], 100 );
