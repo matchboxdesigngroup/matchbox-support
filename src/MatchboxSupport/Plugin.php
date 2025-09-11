@@ -112,7 +112,7 @@ class Plugin {
 		wp_localize_script(
 			'matchbox-helpscout-beacon',
 			'matchbox_helpscout_params',
-			[
+			[ 
 				'beacon_id' => get_option( 'matchbox_helpscout_beacon_id', '' ),
 			]
 		);
@@ -137,7 +137,7 @@ class Plugin {
 		wp_localize_script(
 			'matchbox-helpscout-beacon',
 			'matchbox_helpscout_params',
-			[
+			[ 
 				'beacon_id' => get_option( 'matchbox_helpscout_beacon_id', '' ),
 			]
 		);
@@ -156,7 +156,7 @@ class Plugin {
 		$svg_icon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM169.8 165.3c7.9-22.3 29.1-37.3 52.8-37.3l58.3 0c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24l0-13.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1l-58.3 0c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/></svg>';
 
 		$wp_admin_bar->add_node(
-			[
+			[ 
 				'id'     => 'matchbox_helpscout_toggle',
 				'title'  => '<div class="matchbox-support-pill-toggle" id="matchbox-support-pill-toggle"><div class="toggle-icon">' . $svg_icon . '</div></div>',
 				'href'   => '#',
@@ -324,7 +324,7 @@ class Plugin {
 		);
 
 		add_filter( 'pre_update_option_matchbox_userback_token', [ $this, 'validate_userback_token' ], 10, 2 );
-
+		add_filter( 'pre_update_option_matchbox_helpscout_beacon_id', [ $this, 'validate_helpscout_beacon_id' ], 10, 2 );
 	}
 
 
@@ -350,6 +350,11 @@ class Plugin {
 	public function userback_token_field_cb() {
 		$value = get_option( 'matchbox_userback_token' );
 		echo '<input type="text" id="matchbox_userback_token" name="matchbox_userback_token" value="' . esc_attr( $value ) . '" />';
+		if ( get_option( 'matchbox_userback_token_valid' ) ) {
+			echo '<span style="display:inline-block; vertical-align:middle; margin-left:8px;" title="Valid token"><svg width="20" height="20" viewBox="0 0 20 20" style="vertical-align:middle;"><circle cx="10" cy="10" r="9" fill="#28a745"/><path d="M6 10.5l2.5 2.5 5-5" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+		} else {
+			echo '<span style="display:inline-block; vertical-align:middle; margin-left:8px;" title="Invalid token"><svg width="20" height="20" viewBox="0 0 20 20" style="vertical-align:middle;"><circle cx="10" cy="10" r="9" fill="#dc3545"/><path d="M6 6l8 8M14 6l-8 8" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+		}
 	}
 
 	/**
@@ -362,6 +367,11 @@ class Plugin {
 	public function helpscout_beacon_id_field_cb() {
 		$value = get_option( 'matchbox_helpscout_beacon_id' );
 		echo '<input type="text" id="matchbox_helpscout_beacon_id" name="matchbox_helpscout_beacon_id" value="' . esc_attr( $value ) . '" />';
+		if ( get_option( 'matchbox_helpscout_beacon_id_valid' ) ) {
+			echo '<span style="display:inline-block; vertical-align:middle; margin-left:8px;" title="Valid token"><svg width="20" height="20" viewBox="0 0 20 20" style="vertical-align:middle;"><circle cx="10" cy="10" r="9" fill="#28a745"/><path d="M6 10.5l2.5 2.5 5-5" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+		} else {
+			echo '<span style="display:inline-block; vertical-align:middle; margin-left:8px;" title="Invalid token"><svg width="20" height="20" viewBox="0 0 20 20" style="vertical-align:middle;"><circle cx="10" cy="10" r="9" fill="#dc3545"/><path d="M6 6l8 8M14 6l-8 8" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+		}
 	}
 
 	/**
@@ -388,31 +398,43 @@ class Plugin {
 
 		foreach ( $block_folders as $block_folder ) {
 			// Skip registering the userback-toggle block if the Userback token is not set.
-if ( strpos( $block_folder, 'userback-toggle' ) !== false ) {
-	$userback_token = get_option( 'matchbox_userback_token' );
-	$is_valid       = get_option( 'matchbox_userback_token_valid' );
-	if ( empty( $userback_token ) || ! $is_valid ) {
-		continue;
-	}
-}
-
+			if ( strpos( $block_folder, 'userback-toggle' ) !== false ) {
+				$userback_token = get_option( 'matchbox_userback_token' );
+				$is_valid       = get_option( 'matchbox_userback_token_valid' );
+				if ( empty( $userback_token ) || ! $is_valid ) {
+					continue;
+				}
+			}
 
 			if ( file_exists( $block_folder . '/block.json' ) ) {
 				register_block_type( $block_folder );
 			}
 		}
 	}
+
+	/**
+	 * Validates the Userback access token by making a request to the Userback API.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $new_value The new value of the option.
+	 * @param string $old_value The old value of the option.
+	 *
+	 * @return string The sanitized new value if valid, otherwise the old value.
+	 */
 	public function validate_userback_token( $new_value, $old_value ) {
 		if ( empty( $new_value ) ) {
 			delete_option( 'matchbox_userback_token_valid' );
-			return '';
+			return $old_value;
 		}
 
-		$response = wp_remote_get(
-			'https://api.userback.io/api/v2/projects',
+		$response = wp_remote_post(
+			'https://api.userback.io/?jsSnippetLoad',
 			[
-				'headers' => [
-					'Authorization' => 'Bearer ' . sanitize_text_field( $new_value ),
+				'body' => [ 
+					'action' => 'js_snippet/load',
+					'load_type' => 'web',
+					'access_token' => sanitize_text_field( $new_value ),
 				],
 				'timeout' => 10,
 			]
@@ -425,32 +447,75 @@ if ( strpos( $block_folder, 'userback-toggle' ) !== false ) {
 				'Error connecting to Userback API.',
 				'error'
 			);
+			update_option( 'matchbox_userback_token_valid', false );
+
 			return $old_value;
 		}
 
-		$code = wp_remote_retrieve_response_code( $response );
 		$body = wp_remote_retrieve_body( $response );
 		$json = json_decode( $body, true );
 
-		if ( $code !== 200 || ! is_array( $json ) ) {
+		if ( false === $json ) {
 			add_settings_error(
 				'matchbox_userback_token',
 				'invalid_token',
 				'Invalid Userback access token. Please check and try again.',
 				'error'
 			);
+			update_option( 'matchbox_userback_token_valid', false );
+
 			return $old_value;
 		}
 
 		update_option( 'matchbox_userback_token_valid', true );
 
-		add_settings_error(
-			'matchbox_userback_token',
-			'valid_token',
-			'Userback token is valid.',
-			'updated'
-		);
+		return sanitize_text_field( $new_value );
+	}
 
+	/**
+	 * Validates the HelpScout Beacon ID by making a request to the HelpScout API.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $new_value The new value of the option.
+	 * @param string $old_value The old value of the option.
+	 *
+	 * @return string The sanitized new value if valid, otherwise the old value.
+	 */
+	public function validate_helpscout_beacon_id( $new_value, $old_value ) {
+		if ( empty( $new_value ) ) {
+			delete_option( 'matchbox_helpscout_beacon_id_valid' );
+			return $old_value;
+		}
+
+		$response = wp_remote_get( 'https://d3hb14vkzrxvla.cloudfront.net/v1/' . sanitize_text_field( $new_value ) );
+
+		if ( is_wp_error( $response ) ) {
+			add_settings_error(
+				'matchbox_helpscout_beacon_id',
+				'invalid_beacon_id',
+				'Error connecting to HelpScout API.',
+				'error'
+			);
+			update_option( 'matchbox_helpscout_beacon_id_valid', false );
+			return $old_value;
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		$json = json_decode( $body, true );
+
+		if ( 200 !== wp_remote_retrieve_response_code( $response ) || 'Not Found' === $json['message'] ) {
+			add_settings_error(
+				'matchbox_helpscout_beacon_id',
+				'invalid_beacon_id',
+				'Invalid HelpScout Beacon ID. Please check and try again.',
+				'error'
+			);
+			update_option( 'matchbox_helpscout_beacon_id_valid', false );
+			return $old_value;
+		}
+
+		update_option( 'matchbox_helpscout_beacon_id_valid', true );
 		return sanitize_text_field( $new_value );
 	}
 }
