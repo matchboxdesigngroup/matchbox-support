@@ -57,11 +57,17 @@ class Userback {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 
-		if ( current_user_can( 'manage_options' ) || current_user_can( 'edit_posts' ) ) { // If administrator or editor.
-			add_action( 'wp_footer', array( $this, 'print_script' ), 100 );
-			add_action( 'admin_footer', array( $this, 'print_script' ), 100 );
-			add_action( 'admin_bar_menu', array( $this, 'add_userback_toggle' ), 100 );
+		if ( current_user_can( 'manage_options' ) || current_user_can( 'edit_posts' ) ) {
+			$token      = get_option( 'matchbox_userback_token' );
+			$token_valid = get_option( 'matchbox_userback_token_valid' );
+
+			if ( ! empty( $token ) && $token_valid ) {
+				add_action( 'wp_footer', array( $this, 'print_script' ), 100 );
+				add_action( 'admin_footer', array( $this, 'print_script' ), 100 );
+				add_action( 'admin_bar_menu', array( $this, 'add_userback_toggle' ), 100 );
+			}
 		}
+
 	}
 
 	/**
