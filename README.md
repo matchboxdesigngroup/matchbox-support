@@ -5,6 +5,29 @@ This WordPress plugin adds helpers for the Matchbox support team.
 ## Key features
 
 - Add Matchbox's HelpScout Beacon for site admins.
+- Optional **image forwarding**: rewrite attachment and media API URLs to load images from another domain (e.g. production) on local or staging.
+
+### Image forwarding
+
+Use **Settings → Matchbox Support** to set a **Forward base URL** and **When to apply**.
+
+- **Off** — no URL rewriting.
+- **All environments** — rewriting runs everywhere (use with care on production databases).
+- **Non-production only** — rewriting runs only when `wp_get_environment_type()` is not `production` (i.e. for `local`, `development`, or `staging`).
+
+Set the environment in `wp-config.php`, for example:
+
+```php
+define( 'WP_ENVIRONMENT_TYPE', 'local' ); // or staging, development, production
+```
+
+Optional: define `MATCHBOX_IMAGE_FORWARD_URL` in `wp-config.php` to override the saved base URL (handy for local installs without changing the saved option).
+
+Override forwarding programmatically with the `matchbox_image_forward_allow` filter.
+
+Forwarded URLs are built from WordPress attachment APIs (`wp_get_attachment_url`, image `src`/`srcset`, REST attachment responses, etc.). **Hardcoded media URLs inside saved post HTML are not rewritten.**
+
+If you previously used the separate “MDG Image Forwarding” plugin, deactivate it when using this feature to avoid double replacements.
 
 ### HelpScout Beacon
 

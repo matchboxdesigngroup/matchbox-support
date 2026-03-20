@@ -286,6 +286,9 @@ class Plugin {
 	public function render_settings_page() {
 		echo '<div class="wrap">';
 		echo '<h1>Matchbox Support Settings</h1>';
+		if ( function_exists( 'settings_errors' ) ) {
+			settings_errors();
+		}
 		echo '<form action="options.php" method="post">';
 		settings_fields( 'matchbox-support' );
 		do_settings_sections( 'matchbox-support' );
@@ -304,11 +307,36 @@ class Plugin {
 	public function settings_init() {
 		register_setting( 'matchbox-support', 'matchbox_userback_token' );
 		register_setting( 'matchbox-support', 'matchbox_helpscout_beacon_id' );
+		register_setting(
+			'matchbox-support',
+			'matchbox_image_forward_base_url',
+			[
+				'type'              => 'string',
+				'sanitize_callback' => [ $this, 'sanitize_image_forward_base_url' ],
+				'default'           => '',
+			]
+		);
+		register_setting(
+			'matchbox-support',
+			'matchbox_image_forward_scope',
+			[
+				'type'              => 'string',
+				'sanitize_callback' => [ $this, 'sanitize_image_forward_scope' ],
+				'default'           => 'non_production',
+			]
+		);
 
 		add_settings_section(
 			'matchbox_support_settings_section',
 			'Userback and HelpScout Settings',
 			[ $this, 'settings_section_cb' ],
+			'matchbox-support'
+		);
+
+		add_settings_section(
+			'matchbox_support_image_forward_section',
+			'Image forwarding',
+			[ $this, 'image_forwarding_section_cb' ],
 			'matchbox-support'
 		);
 
@@ -328,6 +356,22 @@ class Plugin {
 			'matchbox_support_settings_section'
 		);
 
+		add_settings_field(
+			'matchbox_image_forward_base_url',
+			'Forward base URL',
+			[ $this, 'image_forward_base_url_field_cb' ],
+			'matchbox-support',
+			'matchbox_support_image_forward_section'
+		);
+
+		add_settings_field(
+			'matchbox_image_forward_scope',
+			'When to apply',
+			[ $this, 'image_forward_scope_field_cb' ],
+			'matchbox-support',
+			'matchbox_support_image_forward_section'
+		);
+
 		add_filter( 'pre_update_option_matchbox_userback_token', [ $this, 'validate_userback_token' ], 10, 2 );
 		add_filter( 'pre_update_option_matchbox_helpscout_beacon_id', [ $this, 'validate_helpscout_beacon_id' ], 10, 2 );
 	}
@@ -343,6 +387,124 @@ class Plugin {
 	 */
 	public function settings_section_cb() {
 		echo '<p>Configure your Matchbox Support settings below.</p>';
+	}
+
+	/**
+	 * Image forwarding section description.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	public function image_forwarding_section_cb() {
+		echo '<p>Rewrite media URLs on this site to load from another domain (for example production) so local or staging environments can display images that only exist remotely.</p>';
+		echo '<p>Set <code>WP_ENVIRONMENT_TYPE</code> in <code>wp-config.php</code> (e.g. <code>local</code>, <code>staging</code>, <code>production</code>). With <strong>Non-production only</strong>, forwarding never runs when the environment type is <code>production</code>.</p>';
+		echo '<p>You may define <code>MATCHBOX_IMAGE_FORWARD_URL</code> in <code>wp-config.php</code> to override the saved base URL (useful without a database option on local installs). Deactivate the separate &ldquo;MDG Image Forwarding&rdquo; plugin if you use this feature here.</p>';
+		echo '<p><strong>Note:</strong> URLs stored inside post HTML are not rewritten; this affects attachment APIs and markup generated from attachment IDs.</p>';
+	}
+
+	/**
+	 * Sanitize image forward base URL setting.
+	 *
+	 * @since TBD
+	 *
+	 * @param mixed $value Submitted value.
+	 * @return string Stored URL with trailing slash, or empty string.
+	 */
+	public function sanitize_image_forward_base_url( $value ) {
+		if ( ! is_string( $value ) ) {
+			return '';
+		}
+
+		$value = trim( $value );
+		if ( '' === $value ) {
+			return '';
+		}
+
+		$url = esc_url_raw( $value );
+		if ( ! preg_match( '#^https?://#i', $url ) ) {
+			add_settings_error(
+				'matchbox_image_forward_base_url',
+				'matchbox_image_forward_url_scheme',
+				__( 'Image forward URL must start with http:// or https://.', 'matchbox-support' ),
+				'error'
+			);
+			return (string) get_option( 'matchbox_image_forward_base_url', '' );
+		}
+
+		if ( ! wp_http_validate_url( $url ) ) {
+			add_settings_error(
+				'matchbox_image_forward_base_url',
+				'matchbox_image_forward_url_invalid',
+				__( 'Image forward URL is not a valid URL.', 'matchbox-support' ),
+				'error'
+			);
+			return (string) get_option( 'matchbox_image_forward_base_url', '' );
+		}
+
+		return trailingslashit( $url );
+	}
+
+	/**
+	 * Sanitize image forward scope setting.
+	 *
+	 * @since TBD
+	 *
+	 * @param mixed $value Submitted value.
+	 * @return string One of off, all, non_production.
+	 */
+	public function sanitize_image_forward_scope( $value ) {
+		$allowed = [ 'off', 'all', 'non_production' ];
+		if ( ! is_string( $value ) || ! in_array( $value, $allowed, true ) ) {
+			return 'non_production';
+		}
+		return $value;
+	}
+
+	/**
+	 * Forward base URL field.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	public function image_forward_base_url_field_cb() {
+		$value = get_option( 'matchbox_image_forward_base_url', '' );
+		if ( ! is_string( $value ) ) {
+			$value = '';
+		}
+		echo '<input type="url" class="regular-text code" id="matchbox_image_forward_base_url" name="matchbox_image_forward_base_url" value="' . esc_attr( untrailingslashit( $value ) ) . '" placeholder="https://example.com" />';
+		echo '<p class="description">' . esc_html__( 'Full site URL to load media from (scheme + host, optional path). Trailing slash is optional.', 'matchbox-support' ) . '</p>';
+	}
+
+	/**
+	 * Forward scope field.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	public function image_forward_scope_field_cb() {
+		$value = get_option( 'matchbox_image_forward_scope', 'non_production' );
+		if ( ! is_string( $value ) || ! in_array( $value, [ 'off', 'all', 'non_production' ], true ) ) {
+			$value = 'non_production';
+		}
+		$opts = [
+			'off'             => __( 'Off', 'matchbox-support' ),
+			'all'             => __( 'All environments', 'matchbox-support' ),
+			'non_production'  => __( 'Non-production only (local, development, staging)', 'matchbox-support' ),
+		];
+		echo '<select id="matchbox_image_forward_scope" name="matchbox_image_forward_scope">';
+		foreach ( $opts as $key => $label ) {
+			printf(
+				'<option value="%s"%s>%s</option>',
+				esc_attr( $key ),
+				selected( $value, $key, false ),
+				esc_html( $label )
+			);
+		}
+		echo '</select>';
+		echo '<p class="description">' . esc_html__( 'Recommended: Non-production only, with WP_ENVIRONMENT_TYPE set correctly on each install.', 'matchbox-support' ) . '</p>';
 	}
 
 	/**
