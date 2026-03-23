@@ -61,3 +61,5 @@ All notable changes to this project will be documented in this file, per [the Ke
 ### Added
 
 - Userback toolbar toggle: Adds a button to the Full Site Editor toolbar that allows users to show or hide the Userback feedback widget while editing.
+- Login security: Blocks generic usernames, common passwords, and optionally pwned passwords via the Have I Been Pwned k-anonymity API. Configurable via settings.
+- Security headers: Configurable HTTP security headers (HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, CSP) sent on all front-end, admin, and login pages.
