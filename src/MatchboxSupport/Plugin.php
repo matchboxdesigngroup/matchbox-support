@@ -36,6 +36,16 @@ class Plugin {
 	private API $api;
 
 	/**
+	 * Login-security helper instance.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @var LoginSecurity
+	 */
+	private LoginSecurity $login_security;
+
+
+	/**
 	 * Plugin path.
 	 *
 	 * @since 1.0.0
@@ -96,6 +106,10 @@ class Plugin {
 
 		$this->api = new API();
 		$this->api->init();
+
+		$this->login_security = new LoginSecurity();
+		$this->login_security->init();
+
 	}
 
 	/**
@@ -330,6 +344,46 @@ class Plugin {
 
 		add_filter( 'pre_update_option_matchbox_userback_token', [ $this, 'validate_userback_token' ], 10, 2 );
 		add_filter( 'pre_update_option_matchbox_helpscout_beacon_id', [ $this, 'validate_helpscout_beacon_id' ], 10, 2 );
+
+		register_setting( 'matchbox-support', 'matchbox_enable_hibp_check' );
+		register_setting( 'matchbox-support', 'matchbox_hide_weak_password_checkbox' );
+		register_setting(
+			'matchbox-support',
+			'matchbox_blocked_usernames',
+			array( 'sanitize_callback' => array( $this, 'sanitize_blocked_usernames' ) )
+		);
+
+		add_settings_section(
+			'matchbox_login_security_section',
+			'Login Security',
+			[ $this, 'login_security_section_cb' ],
+			'matchbox-support'
+		);
+
+		add_settings_field(
+			'matchbox_enable_hibp_check',
+			'Have I Been Pwned Check',
+			[ $this, 'hibp_check_field_cb' ],
+			'matchbox-support',
+			'matchbox_login_security_section'
+		);
+
+		add_settings_field(
+			'matchbox_hide_weak_password_checkbox',
+			'Weak Password Checkbox',
+			[ $this, 'hide_weak_password_field_cb' ],
+			'matchbox-support',
+			'matchbox_login_security_section'
+		);
+
+		add_settings_field(
+			'matchbox_blocked_usernames',
+			'Blocked Usernames',
+			[ $this, 'blocked_usernames_field_cb' ],
+			'matchbox-support',
+			'matchbox_login_security_section'
+		);
+
 	}
 
 
@@ -378,6 +432,82 @@ class Plugin {
 			echo '<span style="display:inline-block; vertical-align:middle; margin-left:8px;" title="Invalid token"><svg width="20" height="20" viewBox="0 0 20 20" style="vertical-align:middle;"><circle cx="10" cy="10" r="9" fill="#dc3545"/><path d="M6 6l8 8M14 6l-8 8" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
 		}
 	}
+
+	/**
+	 * Callback for the Login Security settings section description.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return void
+	 */
+	public function login_security_section_cb() {
+		echo '<p>Configure login security settings. Generic usernames and common passwords are always blocked.</p>';
+	}
+
+	/**
+	 * Callback for rendering the HIBP check toggle field.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return void
+	 */
+	public function hibp_check_field_cb() {
+		$value = get_option( 'matchbox_enable_hibp_check', false );
+		echo '<label for="matchbox_enable_hibp_check">';
+		echo '<input type="checkbox" id="matchbox_enable_hibp_check" name="matchbox_enable_hibp_check" value="1"' . checked( $value, '1', false ) . ' />';
+		echo ' Enable Have I Been Pwned password check';
+		echo '</label>';
+		echo '<p class="description">When enabled, passwords are checked against the <a href="https://haveibeenpwned.com/Passwords" target="_blank" rel="noopener noreferrer">Have I Been Pwned</a> database on login using a privacy-preserving API (k-anonymity). The full password is never sent over the network.</p>';
+	}
+
+	/**
+	 * Callback for rendering the hide weak password checkbox toggle field.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return void
+	 */
+	public function hide_weak_password_field_cb() {
+		$value = get_option( 'matchbox_hide_weak_password_checkbox', false );
+		echo '<label for="matchbox_hide_weak_password_checkbox">';
+		echo '<input type="checkbox" id="matchbox_hide_weak_password_checkbox" name="matchbox_hide_weak_password_checkbox" value="1"' . checked( $value, '1', false ) . ' />';
+		echo ' Hide "Confirm use of weak password" checkbox';
+		echo '</label>';
+		echo '<p class="description">When enabled, the checkbox that allows users to bypass the weak password warning is hidden on profile and password reset screens.</p>';
+	}
+
+	/**
+	 * Callback for rendering the blocked usernames textarea field.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return void
+	 */
+	public function blocked_usernames_field_cb() {
+		$value = get_option( 'matchbox_blocked_usernames', '' );
+		echo '<textarea id="matchbox_blocked_usernames" name="matchbox_blocked_usernames" rows="10" cols="40" placeholder="' . esc_attr( implode( "\n", LoginSecurity::BLOCKED_USERNAMES ) ) . '">' . esc_textarea( $value ) . '</textarea>';
+		echo '<p class="description">One username per line. Usernames are case-insensitive. Leave blank to use the built-in default list.</p>';
+	}
+
+	/**
+	 * Sanitize the blocked usernames option.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param string $value Raw textarea value.
+	 *
+	 * @return string Sanitized newline-separated list of lowercase usernames.
+	 */
+	public function sanitize_blocked_usernames( string $value ): string {
+		$lines = array_filter(
+			array_map(
+				fn( $line ) => strtolower( sanitize_text_field( trim( $line ) ) ),
+				explode( "\n", $value )
+			)
+		);
+		return implode( "\n", array_values( $lines ) );
+	}
+
 
 	/**
 	 * Disables block recommendations from 3rd-party plugins in the block editor.
