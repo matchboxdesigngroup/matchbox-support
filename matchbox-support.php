@@ -55,8 +55,10 @@ if ( ! defined( 'MATCHBOX_SUPPORT_VERSION' ) ) {
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+use MatchboxSupport\ImageForwarding;
 use MatchboxSupport\Plugin;
 use MatchboxSupport\Userback;
 
 Plugin::instance();
 Userback::instance();
+ImageForwarding::instance();
