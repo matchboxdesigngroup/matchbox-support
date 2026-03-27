@@ -36,6 +36,24 @@ class Plugin {
 	private API $api;
 
 	/**
+	 * Login-security helper instance.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @var LoginSecurity
+	 */
+	private LoginSecurity $login_security;
+
+	/**
+	 * Security-headers helper instance.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @var SecurityHeaders
+	 */
+	private SecurityHeaders $security_headers;
+
+	/**
 	 * Plugin path.
 	 *
 	 * @since 1.0.0
@@ -96,6 +114,12 @@ class Plugin {
 
 		$this->api = new API();
 		$this->api->init();
+
+		$this->login_security = new LoginSecurity();
+		$this->login_security->init();
+
+		$this->security_headers = new SecurityHeaders();
+		$this->security_headers->init();
 	}
 
 	/**
@@ -374,6 +398,111 @@ class Plugin {
 
 		add_filter( 'pre_update_option_matchbox_userback_token', [ $this, 'validate_userback_token' ], 10, 2 );
 		add_filter( 'pre_update_option_matchbox_helpscout_beacon_id', [ $this, 'validate_helpscout_beacon_id' ], 10, 2 );
+
+		register_setting( 'matchbox-support', 'matchbox_enable_hibp_check' );
+		register_setting( 'matchbox-support', 'matchbox_hide_weak_password_checkbox' );
+		register_setting(
+			'matchbox-support',
+			'matchbox_blocked_usernames',
+			array( 'sanitize_callback' => array( $this, 'sanitize_blocked_usernames' ) )
+		);
+
+		add_settings_section(
+			'matchbox_login_security_section',
+			'Login Security',
+			[ $this, 'login_security_section_cb' ],
+			'matchbox-support'
+		);
+
+		add_settings_field(
+			'matchbox_enable_hibp_check',
+			'Have I Been Pwned Check',
+			[ $this, 'hibp_check_field_cb' ],
+			'matchbox-support',
+			'matchbox_login_security_section'
+		);
+
+		add_settings_field(
+			'matchbox_hide_weak_password_checkbox',
+			'Weak Password Checkbox',
+			[ $this, 'hide_weak_password_field_cb' ],
+			'matchbox-support',
+			'matchbox_login_security_section'
+		);
+
+		add_settings_field(
+			'matchbox_blocked_usernames',
+			'Blocked Usernames',
+			[ $this, 'blocked_usernames_field_cb' ],
+			'matchbox-support',
+			'matchbox_login_security_section'
+		);
+
+		register_setting( 'matchbox-support', 'matchbox_header_hsts' );
+		register_setting( 'matchbox-support', 'matchbox_header_xcto' );
+		register_setting( 'matchbox-support', 'matchbox_header_xfo' );
+		register_setting( 'matchbox-support', 'matchbox_header_xfo_value' );
+		register_setting( 'matchbox-support', 'matchbox_header_referrer' );
+		register_setting( 'matchbox-support', 'matchbox_header_referrer_value' );
+		register_setting( 'matchbox-support', 'matchbox_header_permissions' );
+		register_setting( 'matchbox-support', 'matchbox_header_permissions_value' );
+		register_setting( 'matchbox-support', 'matchbox_header_csp' );
+		register_setting( 'matchbox-support', 'matchbox_header_csp_value' );
+
+		add_settings_section(
+			'matchbox_security_headers_section',
+			'Security Headers',
+			[ $this, 'security_headers_section_cb' ],
+			'matchbox-support'
+		);
+
+		add_settings_field(
+			'matchbox_header_hsts',
+			'Strict-Transport-Security',
+			[ $this, 'header_hsts_field_cb' ],
+			'matchbox-support',
+			'matchbox_security_headers_section'
+		);
+
+		add_settings_field(
+			'matchbox_header_xcto',
+			'X-Content-Type-Options',
+			[ $this, 'header_xcto_field_cb' ],
+			'matchbox-support',
+			'matchbox_security_headers_section'
+		);
+
+		add_settings_field(
+			'matchbox_header_xfo',
+			'X-Frame-Options',
+			[ $this, 'header_xfo_field_cb' ],
+			'matchbox-support',
+			'matchbox_security_headers_section'
+		);
+
+		add_settings_field(
+			'matchbox_header_referrer',
+			'Referrer-Policy',
+			[ $this, 'header_referrer_field_cb' ],
+			'matchbox-support',
+			'matchbox_security_headers_section'
+		);
+
+		add_settings_field(
+			'matchbox_header_permissions',
+			'Permissions-Policy',
+			[ $this, 'header_permissions_field_cb' ],
+			'matchbox-support',
+			'matchbox_security_headers_section'
+		);
+
+		add_settings_field(
+			'matchbox_header_csp',
+			'Content-Security-Policy',
+			[ $this, 'header_csp_field_cb' ],
+			'matchbox-support',
+			'matchbox_security_headers_section'
+		);
 	}
 
 
@@ -539,6 +668,215 @@ class Plugin {
 		} else {
 			echo '<span style="display:inline-block; vertical-align:middle; margin-left:8px;" title="Invalid token"><svg width="20" height="20" viewBox="0 0 20 20" style="vertical-align:middle;"><circle cx="10" cy="10" r="9" fill="#dc3545"/><path d="M6 6l8 8M14 6l-8 8" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
 		}
+	}
+
+	/**
+	 * Callback for the Login Security settings section description.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return void
+	 */
+	public function login_security_section_cb() {
+		echo '<p>Configure login security settings. Generic usernames and common passwords are always blocked.</p>';
+	}
+
+	/**
+	 * Callback for rendering the HIBP check toggle field.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return void
+	 */
+	public function hibp_check_field_cb() {
+		$value = get_option( 'matchbox_enable_hibp_check', false );
+		echo '<label for="matchbox_enable_hibp_check">';
+		echo '<input type="checkbox" id="matchbox_enable_hibp_check" name="matchbox_enable_hibp_check" value="1"' . checked( $value, '1', false ) . ' />';
+		echo ' Enable Have I Been Pwned password check';
+		echo '</label>';
+		echo '<p class="description">When enabled, passwords are checked against the <a href="https://haveibeenpwned.com/Passwords" target="_blank" rel="noopener noreferrer">Have I Been Pwned</a> database on login using a privacy-preserving API (k-anonymity). The full password is never sent over the network.</p>';
+	}
+
+	/**
+	 * Callback for rendering the hide weak password checkbox toggle field.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return void
+	 */
+	public function hide_weak_password_field_cb() {
+		$value = get_option( 'matchbox_hide_weak_password_checkbox', false );
+		echo '<label for="matchbox_hide_weak_password_checkbox">';
+		echo '<input type="checkbox" id="matchbox_hide_weak_password_checkbox" name="matchbox_hide_weak_password_checkbox" value="1"' . checked( $value, '1', false ) . ' />';
+		echo ' Hide "Confirm use of weak password" checkbox';
+		echo '</label>';
+		echo '<p class="description">When enabled, the checkbox that allows users to bypass the weak password warning is hidden on profile and password reset screens.</p>';
+	}
+
+	/**
+	 * Callback for rendering the blocked usernames textarea field.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return void
+	 */
+	public function blocked_usernames_field_cb() {
+		$value = get_option( 'matchbox_blocked_usernames', '' );
+		echo '<textarea id="matchbox_blocked_usernames" name="matchbox_blocked_usernames" rows="10" cols="40" placeholder="' . esc_attr( implode( "\n", LoginSecurity::BLOCKED_USERNAMES ) ) . '">' . esc_textarea( $value ) . '</textarea>';
+		echo '<p class="description">One username per line. Usernames are case-insensitive. Leave blank to use the built-in default list.</p>';
+	}
+
+	/**
+	 * Sanitize the blocked usernames option.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param string $value Raw textarea value.
+	 *
+	 * @return string Sanitized newline-separated list of lowercase usernames.
+	 */
+	public function sanitize_blocked_usernames( string $value ): string {
+		$lines = array_filter(
+			array_map(
+				fn( $line ) => strtolower( sanitize_text_field( trim( $line ) ) ),
+				explode( "\n", $value )
+			)
+		);
+		return implode( "\n", array_values( $lines ) );
+	}
+
+	/**
+	 * Callback for the Security Headers settings section description.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return void
+	 */
+	public function security_headers_section_cb() {
+		echo '<p>Configure HTTP security headers sent on all front-end, admin, and login pages. All headers default to <strong>off</strong> — enabling them on an existing site is safe, but review each header\'s value before enabling.</p>';
+	}
+
+	/**
+	 * Callback for rendering the Strict-Transport-Security header field.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return void
+	 */
+	public function header_hsts_field_cb() {
+		$enabled = get_option( 'matchbox_header_hsts', false );
+		echo '<label for="matchbox_header_hsts">';
+		echo '<input type="checkbox" id="matchbox_header_hsts" name="matchbox_header_hsts" value="1"' . checked( $enabled, '1', false ) . ' />';
+		echo ' Enable Strict-Transport-Security header';
+		echo '</label>';
+		echo '<p class="description">Fixed value: <code>max-age=31536000; includeSubDomains</code><br><strong>Warning:</strong> Only enable this on sites fully served over HTTPS. Once sent, browsers will refuse HTTP connections for the duration of <code>max-age</code>.</p>';
+	}
+
+	/**
+	 * Callback for rendering the X-Content-Type-Options header field.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return void
+	 */
+	public function header_xcto_field_cb() {
+		$enabled = get_option( 'matchbox_header_xcto', false );
+		echo '<label for="matchbox_header_xcto">';
+		echo '<input type="checkbox" id="matchbox_header_xcto" name="matchbox_header_xcto" value="1"' . checked( $enabled, '1', false ) . ' />';
+		echo ' Enable X-Content-Type-Options header';
+		echo '</label>';
+		echo '<p class="description">Fixed value: <code>nosniff</code>. Prevents browsers from MIME-sniffing responses away from the declared content type.</p>';
+	}
+
+	/**
+	 * Callback for rendering the X-Frame-Options header field.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return void
+	 */
+	public function header_xfo_field_cb() {
+		$enabled = get_option( 'matchbox_header_xfo', false );
+		$value   = get_option( 'matchbox_header_xfo_value', 'SAMEORIGIN' );
+		echo '<label for="matchbox_header_xfo">';
+		echo '<input type="checkbox" id="matchbox_header_xfo" name="matchbox_header_xfo" value="1"' . checked( $enabled, '1', false ) . ' />';
+		echo ' Enable X-Frame-Options header';
+		echo '</label>';
+		echo '<br><br>';
+		echo '<select id="matchbox_header_xfo_value" name="matchbox_header_xfo_value">';
+		foreach ( array( 'SAMEORIGIN', 'DENY' ) as $option ) {
+			echo '<option value="' . esc_attr( $option ) . '"' . selected( $value, $option, false ) . '>' . esc_html( $option ) . '</option>';
+		}
+		echo '</select>';
+		echo '<p class="description">Prevents the site from being embedded in an <code>&lt;iframe&gt;</code>. <code>SAMEORIGIN</code> allows same-origin embeds; <code>DENY</code> blocks all framing.</p>';
+	}
+
+	/**
+	 * Callback for rendering the Referrer-Policy header field.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return void
+	 */
+	public function header_referrer_field_cb() {
+		$enabled = get_option( 'matchbox_header_referrer', false );
+		$value   = get_option( 'matchbox_header_referrer_value', 'strict-origin-when-cross-origin' );
+		$options = array(
+			'strict-origin-when-cross-origin',
+			'no-referrer',
+			'same-origin',
+			'origin',
+			'no-referrer-when-downgrade',
+		);
+		echo '<label for="matchbox_header_referrer">';
+		echo '<input type="checkbox" id="matchbox_header_referrer" name="matchbox_header_referrer" value="1"' . checked( $enabled, '1', false ) . ' />';
+		echo ' Enable Referrer-Policy header';
+		echo '</label>';
+		echo '<br><br>';
+		echo '<select id="matchbox_header_referrer_value" name="matchbox_header_referrer_value">';
+		foreach ( $options as $option ) {
+			echo '<option value="' . esc_attr( $option ) . '"' . selected( $value, $option, false ) . '>' . esc_html( $option ) . '</option>';
+		}
+		echo '</select>';
+		echo '<p class="description">Controls how much referrer information is included with requests. <code>strict-origin-when-cross-origin</code> is the recommended default.</p>';
+	}
+
+	/**
+	 * Callback for rendering the Permissions-Policy header field.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return void
+	 */
+	public function header_permissions_field_cb() {
+		$enabled = get_option( 'matchbox_header_permissions', false );
+		$value   = get_option( 'matchbox_header_permissions_value', 'camera=(), microphone=(), geolocation=()' );
+		echo '<label for="matchbox_header_permissions">';
+		echo '<input type="checkbox" id="matchbox_header_permissions" name="matchbox_header_permissions" value="1"' . checked( $enabled, '1', false ) . ' />';
+		echo ' Enable Permissions-Policy header';
+		echo '</label>';
+		echo '<br><br>';
+		echo '<textarea id="matchbox_header_permissions_value" name="matchbox_header_permissions_value" rows="3" cols="60">' . esc_textarea( $value ) . '</textarea>';
+		echo '<p class="description">Restricts access to browser features. Default disables camera, microphone, and geolocation. Each directive follows the format <code>feature=()</code> to deny or <code>feature=(*)</code> to allow.</p>';
+	}
+
+	/**
+	 * Callback for rendering the Content-Security-Policy header field.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return void
+	 */
+	public function header_csp_field_cb() {
+		$enabled = get_option( 'matchbox_header_csp', false );
+		$value   = get_option( 'matchbox_header_csp_value', 'upgrade-insecure-requests' );
+		echo '<label for="matchbox_header_csp">';
+		echo '<input type="checkbox" id="matchbox_header_csp" name="matchbox_header_csp" value="1"' . checked( $enabled, '1', false ) . ' />';
+		echo ' Enable Content-Security-Policy header';
+		echo '</label>';
+		echo '<br><br>';
+		echo '<textarea id="matchbox_header_csp_value" name="matchbox_header_csp_value" rows="3" cols="60">' . esc_textarea( $value ) . '</textarea>';
+		echo '<p class="description"><strong>Warning:</strong> A strict CSP can break site functionality (scripts, styles, inline code). The default <code>upgrade-insecure-requests</code> is safe for most sites. Test carefully before deploying a custom policy.</p>';
 	}
 
 	/**
