@@ -6,7 +6,6 @@
 .env
 .git
 .github
-build
 composer.json
 composer.lock
 node_modules
