@@ -315,10 +315,38 @@ class Plugin {
 		}
 		echo '<form action="options.php" method="post">';
 		settings_fields( 'matchbox-support' );
-		do_settings_sections( 'matchbox-support' );
-		submit_button();
+		$this->do_settings_sections_with_buttons( 'matchbox-support' );
 		echo '</form>';
 		echo '</div>';
+	}
+
+	/**
+	 * Renders all settings sections for a page with a Save Changes button after each one.
+	 *
+	 * @param string $page Settings page slug.
+	 * @return void
+	 */
+	private function do_settings_sections_with_buttons( string $page ): void {
+		global $wp_settings_sections, $wp_settings_fields;
+
+		if ( ! isset( $wp_settings_sections[ $page ] ) ) {
+			return;
+		}
+
+		foreach ( (array) $wp_settings_sections[ $page ] as $section ) {
+			if ( $section['title'] ) {
+				echo '<h2>' . esc_html( $section['title'] ) . '</h2>';
+			}
+			if ( $section['callback'] ) {
+				call_user_func( $section['callback'], $section );
+			}
+			if ( isset( $wp_settings_fields[ $page ][ $section['id'] ] ) ) {
+				echo '<table class="form-table" role="presentation">';
+				do_settings_fields( $page, $section['id'] );
+				echo '</table>';
+			}
+			submit_button();
+		}
 	}
 
 	/**
@@ -330,6 +358,7 @@ class Plugin {
 	 */
 	public function settings_init() {
 		register_setting( 'matchbox-support', 'matchbox_userback_token' );
+		register_setting( 'matchbox-support', 'matchbox_userback_public' );
 		register_setting( 'matchbox-support', 'matchbox_helpscout_beacon_id' );
 		register_setting(
 			'matchbox-support',
@@ -368,6 +397,14 @@ class Plugin {
 			'matchbox_userback_token',
 			'Userback Access Token',
 			[ $this, 'userback_token_field_cb' ],
+			'matchbox-support',
+			'matchbox_support_settings_section'
+		);
+
+		add_settings_field(
+			'matchbox_userback_public',
+			'Show Widget to Logged-Out Visitors',
+			[ $this, 'userback_public_field_cb' ],
 			'matchbox-support',
 			'matchbox_support_settings_section'
 		);
@@ -651,6 +688,21 @@ class Plugin {
 		} else {
 			echo '<span style="display:inline-block; vertical-align:middle; margin-left:8px;" title="Invalid token"><svg width="20" height="20" viewBox="0 0 20 20" style="vertical-align:middle;"><circle cx="10" cy="10" r="9" fill="#dc3545"/><path d="M6 6l8 8M14 6l-8 8" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
 		}
+	}
+
+	/**
+	 * Callback for rendering the "show to logged-out visitors" toggle.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	public function userback_public_field_cb() {
+		$value = get_option( 'matchbox_userback_public', false );
+		echo '<label for="matchbox_userback_public">';
+		echo '<input type="checkbox" id="matchbox_userback_public" name="matchbox_userback_public" value="1"' . checked( $value, '1', false ) . ' />';
+		echo ' Show the Userback widget on the front end for all visitors, including those who are not logged in';
+		echo '</label>';
 	}
 
 	/**

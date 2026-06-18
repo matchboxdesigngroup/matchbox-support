@@ -64,3 +64,18 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Login security: Blocks generic usernames, common passwords, and optionally pwned passwords via the Have I Been Pwned k-anonymity API. Configurable via settings.
 - Security headers: Configurable HTTP security headers (HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, CSP) sent on all front-end, admin, and login pages.
 - Image Forwarding Plugin: Rewrite media URLs on this site to load from another domain (for example production) so local or staging environments can display images that only exist remotely.
+
+[2.0.4]: https://github.com/matchboxdesigngroup/matchbox-support/releases/tag/v2.0.4
+
+## [2.0.5] - 2026-06-18
+
+### Added
+
+- Userback: new setting to show the feedback widget to logged-out visitors on the front end.
+- Settings page: Save Changes button after each settings section to avoid scrolling to the bottom.
+
+### Changed
+
+- `.distignore`: exclude `.claude` directory from release ZIP.
+
+[2.0.5]: https://github.com/matchboxdesigngroup/matchbox-support/releases/tag/v2.0.5

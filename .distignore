@@ -4,6 +4,7 @@
 .phpcs.xml
 .DS_Store
 .env
+.claude
 .git
 .github
 composer.json
