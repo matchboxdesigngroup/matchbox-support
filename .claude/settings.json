@@ -1,0 +1,128 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(cd apps/* && *)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git pull:*)",
+      "Bash(git push:*)",
+      "Bash(git stash:*)",
+      "Bash(git mv:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(gh api:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh repo view:*)",
+      "Bash(npm run:*)",
+      "Bash(pnpm:*)",
+      "Bash(pnpm run:*)",
+      "Bash(npx:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npx drizzle-kit:*)",
+      "Bash(drizzle-kit:*)",
+      "Bash(vitest:*)",
+      "Bash(bunx:*)",
+      "Bash(psql * -c \"SELECT*)",
+      "Bash(psql * -c \"WITH*)",
+      "Bash(psql * -c \"\\d*)",
+      "Bash(PGPASSWORD=* psql * -c \"SELECT*)",
+      "Bash(PGPASSWORD=* psql * -c \"WITH*)",
+      "Bash(PGPASSWORD=* psql * -c \"\\d*)",
+      "Bash(curl -s http://localhost:*)",
+      "Bash(lsof -iTCP:*)",
+      "Bash(lsof -ti::*)",
+      "Bash(pkill -f vite*)",
+      "Read(/tmp/**)",
+      "Read(/private/tmp/**)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:localhost)",
+      "WebFetch(domain:127.0.0.1)",
+      "WebSearch",
+      "Skill(session:*)",
+      "Skill(code-review:*)",
+      "mcp__Claude_in_Chrome__*",
+      "mcp__Claude_Preview__preview_start"
+    ],
+    "deny": [
+      "Bash(git push)",
+      "Bash(git push origin)",
+      "Bash(git push origin main)",
+      "Bash(git push origin main:*)",
+      "Bash(git push origin master)",
+      "Bash(git push origin master:*)",
+      "Bash(git push origin HEAD)",
+      "Bash(git push origin HEAD:main*)",
+      "Bash(git push origin HEAD:master*)",
+      "Bash(git push * main)",
+      "Bash(git push * main:*)",
+      "Bash(git push * master)",
+      "Bash(git push * master:*)",
+      "Bash(git push * HEAD:main*)",
+      "Bash(git push * HEAD:master*)",
+      "Bash(git push -u origin main*)",
+      "Bash(git push -u origin master*)",
+      "Bash(git push --set-upstream origin main*)",
+      "Bash(git push --set-upstream origin master*)",
+      "Bash(git push --force:*)",
+      "Bash(git push --force-with-lease:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push --mirror:*)",
+      "Bash(git push --all:*)",
+      "Bash(git push * +main*)",
+      "Bash(git push * +master*)",
+      "Bash(git push origin :main*)",
+      "Bash(git push origin :master*)",
+      "Bash(git push origin --delete main*)",
+      "Bash(git push origin --delete master*)",
+      "Bash(git checkout .)",
+      "Bash(git checkout --:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash(git add*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/protect-env.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(git commit*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/protect-env.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/block-main-commits.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/scan-injection.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
