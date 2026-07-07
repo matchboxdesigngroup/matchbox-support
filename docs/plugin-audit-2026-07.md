@@ -55,6 +55,9 @@ Both validators return `$old_value` when the submitted value is empty (`Plugin.p
 ### 🟡 1.9 HelpScout validation hits a hardcoded CloudFront hostname
 `Plugin.php:1048` requests `https://d3hb14vkzrxvla.cloudfront.net/v1/<id>`. That distribution hostname is an implementation detail of HelpScout's CDN and can change without notice, at which point validation silently breaks (and with 1.2 fixed, valid beacons would start being rejected). Isolate it as a class constant with a comment, and handle its disappearance gracefully.
 
+### 🟠 1.10 69 open Dependabot alerts on the default branch
+GitHub reports 3 critical, 28 high, 31 moderate, and 7 low vulnerability alerts (https://github.com/matchboxdesigngroup/matchbox-support/security/dependabot). These are almost certainly in the npm dev-dependency tree (`@wordpress/scripts` and `package-lock.json`), which does not ship in the release ZIP — but the lockfile is used verbatim by `npm ci` in the release workflow, so build-time tooling runs vulnerable code. Refresh `@wordpress/scripts` and regenerate the lockfile, then triage what remains.
+
 ---
 
 ## 2. Performance
